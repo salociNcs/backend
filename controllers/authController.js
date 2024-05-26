@@ -3,13 +3,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
     try {
-        let user = await User.findOne({ username });
+        console.log(username);
+        console.log(email);
+        let user = await User.findOne({ $or: [{ username }, { email }] });
         if (user) {
-            return res.status(400).json({ msg: 'Benutzername bereits vergeben' });
+            return res.status(400).json({ msg: 'Benutzername oder E-Mail bereits vergeben' });
         }
-        user = new User({ username, password });
+        user = new User({ username, email, password });
         await user.save();
         const payload = { user: { id: user.id } };
         jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: 360000 }, (err, token) => {
@@ -18,14 +20,14 @@ exports.register = async (req, res) => {
         });
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Serverfehler');
+        res.status(500).json({ msg: 'Serverfehler' });
     }
 };
 
 exports.login = async (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
     try {
-        let user = await User.findOne({ username });
+        let user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ msg: 'Ungültige Anmeldedaten' });
         }
@@ -40,7 +42,7 @@ exports.login = async (req, res) => {
         });
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Serverfehler');
+        res.status(500).json({ msg: 'Serverfehler' });
     }
 };
 
@@ -50,6 +52,6 @@ exports.getUser = async (req, res) => {
         res.json(user);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Serverfehler');
+        res.status(500).json({ msg: 'Serverfehler' });
     }
 };
