@@ -33,19 +33,20 @@ exports.register = async (req, res) => {
 };
 
 exports.verifyEmail = async (req, res) => {
-    const { code } = req.query;
+    const { verificationCode } = req.body;
     try {
-        const user = await User.findOne({ verificationCode: code });
+        console.log(verificationCode);
+        const user = await User.findOne({ verificationCode });
         if (!user) {
             return res.status(400).json({ msg: 'Ungültiger Bestätigungscode' });
         }
         user.isVerified = true;
         user.verificationCode = null;
         await user.save();
-        res.redirect('/login');
+        res.status(200);
     } catch (err) {
         console.error('Error in verifyEmail:', err.message);
-        res.status(500).json({ msg: 'Serverfehler' });
+        res.status(500).json({ msg: err.message });
     }
 };
 
