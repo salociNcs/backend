@@ -1,0 +1,8 @@
+
+POST http://localhost:4000/api/watchFinder/watchDataForVoting HTTP/1.1
+content-type: application/json
+
+{
+    "userId": "userid233343",
+    "poolId": "poolid12213"
+}

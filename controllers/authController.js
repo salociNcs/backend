@@ -35,7 +35,6 @@ exports.register = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
     const { verificationCode } = req.body;
     try {
-        console.log(verificationCode);
         const user = await User.findOne({ verificationCode });
         if (!user) {
             return res.status(400).json({ msg: 'Ungültiger Bestätigungscode' });
@@ -79,6 +78,9 @@ exports.login = async (req, res) => {
 exports.getUser = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
+        if (!user) {
+            throw "User not found";
+        }
         res.json(user);
     } catch (err) {
         console.error(err.message);
@@ -101,7 +103,8 @@ exports.resendVerification = async (req, res) => {
         user.verificationCode = verificationCode;
         await user.save();
 
-        const confirmLink = `http://localhost:3000/api/auth/verify-email?code=${verificationCode}`;
+        // const confirmLink = `http://localhost:3000/api/auth/verify-email?code=${verificationCode}`;
+        const confirmLink = `http://localhost:3000/verify-email?code=${verificationCode}`;
 
         await sendEmail(
             user.email,
